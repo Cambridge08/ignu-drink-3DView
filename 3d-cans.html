@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>IGNƱ 3D Drink Cans</title>
+  <style>
+    body { margin: 0; background: #0f172a; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    #container { display: flex; gap: 40px; }
+    canvas { border-radius: 20px; }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script>
+    const container = document.getElementById('container');
+
+    const labels = [
+      'https://i.imgur.com/XP2BE7q.png', // Solar Citrus
+      'https://i.imgur.com/1t6Whqv.png', // Frost Berry
+      'https://i.imgur.com/dtx5G6v.png'  // Volt Punch
+    ];
+
+    function createCan(labelUrl) {
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
+      camera.position.z = 5;
+
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setSize(200, 400);
+      container.appendChild(renderer.domElement);
+
+      const light = new THREE.DirectionalLight(0xffffff, 1);
+      light.position.set(0, 1, 1).normalize();
+      scene.add(light);
+
+      const geometry = new THREE.CylinderGeometry(1, 1, 3, 64, 1, true);
+
+      const textureLoader = new THREE.TextureLoader();
+      const texture = textureLoader.load(labelUrl);
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.repeat.x = 1;
+
+      const materials = [
+        new THREE.MeshStandardMaterial({ color: 0xc0c0c0 }),
+        new THREE.MeshStandardMaterial({ color: 0xc0c0c0 }),
+        new THREE.MeshStandardMaterial({ map: texture })
+      ];
+
+      geometry.clearGroups();
+      geometry.addGroup(0, geometry.index.count / 3 * 2, 2);
+      geometry.addGroup(geometry.index.count / 3 * 2, geometry.index.count / 3, 0);
+      geometry.addGroup(geometry.index.count / 3 * 3, 0, 1);
+
+      const can = new THREE.Mesh(geometry, materials);
+      scene.add(can);
+
+      function animate() {
+        requestAnimationFrame(animate);
+        can.rotation.y += 0.01;
+        renderer.render(scene, camera);
+      }
+      animate();
+    }
+
+    labels.forEach(url => createCan(url));
+  </script>
+</body>
+</html>
